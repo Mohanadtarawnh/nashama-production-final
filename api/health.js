@@ -1,0 +1,2 @@
+const { TEAM_ID, LEAGUE_ID, SEASON, KEY, send } = require('./_shared');
+module.exports = async (req,res)=>send(res,200,{ok:true,provider:'API-FOOTBALL / API-SPORTS',configured:Boolean(KEY),teamId:TEAM_ID,leagueId:LEAGUE_ID,season:SEASON,message: KEY ? 'مفتاح API موجود. صفحات المباشر والمباريات ستطلب البيانات من المزود عبر proxy.' : 'أضف API_FOOTBALL_KEY في Environment Variables لتفعيل البيانات الحية. البنية جاهزة ولا تحتاج تغيير كود.'});
