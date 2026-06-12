@@ -58,10 +58,34 @@ function homePage(){
   `;
 }
 function matchCard(m){
-  return `<article class="card match-card"><span class="pill">Match ${m.matchNo} • Group ${m.group}</span><div class="scoreline"><strong>${m.homeAr}</strong><span class="score">-</span><strong>${m.awayAr}</strong></div><p class="meta">${formatAmman(m.amman)}<br>${m.venue} — ${m.city}</p></article>`;
+  return `
+    <article class="match-card">
+      <div class="muted">Match ${escapeHTML(m.matchNo)} • Group ${escapeHTML(m.group)}</div>
+      <h3>${escapeHTML(m.homeAr)} - ${escapeHTML(m.awayAr)}</h3>
+      <p>${escapeHTML(formatAmman(m.amman))}</p>
+      <p>${escapeHTML(m.venue)} — ${escapeHTML(m.city)}</p>
+    </article>
+  `;
 }
 function playerCard(p){
-  return `<article class="card player"><div class="num">${p.no}</div><span class="pill">${p.posAr}</span><h3>${p.nameAr}</h3><p class="club">${p.club} (${p.country})</p><div class="tag-row"><span class="pill">${p.caps} مباراة</span><span class="pill">${p.goals} هدف</span><span class="pill">${p.height} سم</span></div></article>`;
+  return `
+    <article class="player-card">
+      <div class="player-top">
+        <span class="number">${escapeHTML(p.no)}</span>
+        <span class="pill">${escapeHTML(p.posAr)}</span>
+      </div>
+
+      <h3>${escapeHTML(p.nameAr)}</h3>
+
+      <p>${escapeHTML(p.club)} (${escapeHTML(p.country)})</p>
+
+      <div class="mini-stats">
+        <span>${escapeHTML(p.caps)} مباراة</span>
+        <span>${escapeHTML(p.goals)} هدف</span>
+        <span>${escapeHTML(p.height)} سم</span>
+      </div>
+    </article>
+  `;
 }
 
 function squadPage(){
@@ -88,8 +112,22 @@ async function fixturesPage(){
 }
 function normalizeFixture(x){
   if(x.homeAr) return x;
-  const f=x.fixture||{}, teams=x.teams||{};
-  return {matchNo:f.id||'',group:'J',home:teams.home?.name,away:teams.away?.name,homeAr:teams.home?.name||'Home',awayAr:teams.away?.name||'Away',amman:f.date||new Date().toISOString(),venue:f.venue?.name||'TBD',city:f.venue?.city||'',status:f.status?.short||''};
+
+  const f = x.fixture || {};
+  const teams = x.teams || {};
+
+  return {
+    matchNo: f.id || '',
+    group: 'J',
+    home: teams.home?.name || '',
+    away: teams.away?.name || '',
+    homeAr: teams.home?.name || 'Home',
+    awayAr: teams.away?.name || 'Away',
+    amman: f.date || new Date().toISOString(),
+    venue: f.venue?.name || 'TBD',
+    city: f.venue?.city || '',
+    status: f.status?.short || ''
+  };
 }
 
 async function livePage(){
@@ -102,15 +140,58 @@ async function livePage(){
       return;
     }
     root.innerHTML = liveBoard(res.data[0]);
-  }catch(e){root.innerHTML = '<div class="error">فشل الاتصال بخدمة المباشر. راجع صفحة فحص الربط.</div>';}
+  }
+  catch(e){root.innerHTML = '<div class="error">فشل الاتصال بخدمة المباشر. راجع صفحة فحص الربط.</div>';}
 }
 function liveBoard(match){
   if(!match){
-    const n=fixturesSeed[0];
-    return `<div class="panel live-board" style="margin-top:16px"><div class="live-team"><strong>${n.homeAr}</strong><span class="meta">${n.home}</span><div class="live-score-num">0</div></div><div><span class="pill">لم تبدأ</span><p class="meta">${formatAmman(n.amman)}</p></div><div class="live-team"><strong>${n.awayAr}</strong><span class="meta">${n.away}</span><div class="live-score-num">0</div></div></div>`;
+    const n = fixturesSeed[0];
+
+    return `
+      <div class="live-board">
+        <div class="team">
+          <h3>${escapeHTML(n.homeAr)}</h3>
+          <span>${escapeHTML(n.home)}</span>
+          <strong>0</strong>
+        </div>
+
+        <div class="live-center">
+          <span>لم تبدأ</span>
+          <p>${escapeHTML(formatAmman(n.amman))}</p>
+        </div>
+
+        <div class="team">
+          <h3>${escapeHTML(n.awayAr)}</h3>
+          <span>${escapeHTML(n.away)}</span>
+          <strong>0</strong>
+        </div>
+      </div>
+    `;
   }
-  const h=match.teams.home,a=match.teams.away,g=match.goals||{},st=match.fixture.status||{};
-  return `<div class="panel live-board"><div class="live-team"><strong>${h.name}</strong><div class="live-score-num">${g.home ?? 0}</div></div><div><span class="pill"><i class="status-dot"></i> ${st.long || 'Live'}</span><p class="meta">الدقيقة: ${st.elapsed ?? '--'}</p></div><div class="live-team"><strong>${a.name}</strong><div class="live-score-num">${g.away ?? 0}</div></div></div>`;
+
+  const h = match.teams?.home || {};
+  const a = match.teams?.away || {};
+  const g = match.goals || {};
+  const st = match.fixture?.status || {};
+
+  return `
+    <div class="live-board">
+      <div class="team">
+        <h3>${escapeHTML(h.name)}</h3>
+        <strong>${escapeHTML(g.home ?? 0)}</strong>
+      </div>
+
+      <div class="live-center">
+        <span>${escapeHTML(st.long || 'Live')}</span>
+        <p>الدقيقة: ${escapeHTML(st.elapsed ?? '--')}</p>
+      </div>
+
+      <div class="team">
+        <h3>${escapeHTML(a.name)}</h3>
+        <strong>${escapeHTML(g.away ?? 0)}</strong>
+      </div>
+    </div>
+  `;
 }
 
 function statsPage(){
