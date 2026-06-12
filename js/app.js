@@ -3,7 +3,14 @@ import { SITE, squad, fixturesSeed, groupSeed } from './data.js';
 const $ = (selector, root=document) => root.querySelector(selector);
 const $$ = (selector, root=document) => [...root.querySelectorAll(selector)];
 const API_BASE = window.NASHAMA_API_BASE || '';
-
+function escapeHTML(value) {
+  return String(value ?? '')
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
 function setActiveNav(){
   const current = location.pathname.split('/').pop() || 'index.html';
   $$('.links a').forEach(a => { if(a.getAttribute('href') === current) a.classList.add('active'); });
